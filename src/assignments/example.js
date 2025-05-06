@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const [toDo, setToDo] = useState("");
-  const [toDos, setToDos] = useState([]);
+  const [toDos, setToDos] = useState(() => {
+    const saved = localStorage.getItem("todos");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(toDos));
+  }, [toDos]);
+
   const onChange = (event) => setToDo(event.target.value);
   const onSubmit = (event) => {
     event.preventDefault();
-    if (toDo === "") {
-      return;
-    }
-    setToDos((currentArray) => [toDo, ...currentArray]);
+    if (toDo === "") return;
+    setToDos((current) => [toDo, ...current]);
     setToDo("");
   };
 
@@ -21,14 +27,19 @@ function App() {
           onChange={onChange}
           value={toDo}
           type="text"
-          placeholder="write your to do..."
+          placeholder="Write your to do..."
         />
         <button>Add To Do</button>
       </form>
       <hr />
       <ul>
-      {toDos.map((item, index) => (
-        <li key={index}>{item}</li>
+        {toDos.map((item, index) => (
+          <li key={index}>
+            {item}{" "}
+            <button onClick={() => {
+              setToDos((current) => current.filter((_, i) => i !== index));
+            }}>❌</button>
+          </li>
         ))}
       </ul>
     </div>
